@@ -1,1 +1,4 @@
-./resource/*
+resource/*
+*.jpg
+.DS_Store
+
