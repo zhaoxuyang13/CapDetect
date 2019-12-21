@@ -12,6 +12,7 @@ import shutil
 path = './resource/'
 resPath = './results/'
 donePath = './dones/'
+wrongPath = './wrong/'
 with open('./number.txt', 'r') as f:
     count = f.read()
 count = int(count)
@@ -30,11 +31,8 @@ for file in os.listdir(path):
         filename = str(now.strftime("%d-%H-%M-%S"))
         num_of_pages = str(count)
         filename = resPath+filename + '_'+ num_of_pages +'.jpg'
-        
         cv2.imwrite(filename, imgOut)
         count = count+1
-        # plt.imshow(imgOut)
-        # plt.figure()
         cv2.imshow("imgOut", imgOut)  # 裁减得到的旋转矩形框
         keycode=cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -46,7 +44,10 @@ for file in os.listdir(path):
         lastname = filename
         dataframe = pd.DataFrame({'filename':[filename],'label':[label]})
         dataframe.to_csv('label.csv', mode='a', index=False, header=False)   
-    shutil.move(path+file,donePath+file)
+    if not len(cuts) == 10:
+        shutil.move(path+file,wrongPath+file)
+    else :
+        shutil.move(path+file,donePath+file)
        
 with open('./number.txt', 'w') as f:
     f.write(str(count))

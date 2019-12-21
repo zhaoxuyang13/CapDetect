@@ -63,13 +63,14 @@ def cut_image(origin):
     (_, thresh) = cv2.threshold(blurred, 35, 255, cv2.THRESH_BINARY)
     # plt.imshow(thresh)
     
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
-    cl = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     # plt.imshow(cl)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+    cl = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 30))
     closed = cv2.morphologyEx(cl, cv2.MORPH_CLOSE, kernel)
     # plt.imshow(closed)
 
@@ -85,10 +86,8 @@ def cut_image(origin):
     res = np.copy(origin)
     cuts = []
     for c in cnts:
-        if len(c) <= 400:
+        if len(c) <= 300:
             continue
-        ct = ct + 1
-        ls.append(len(c))
         # compute the rotated bounding box of the largest contour
         rect = cv2.minAreaRect(c)
         box = np.int0(cv2.boxPoints(rect))
@@ -97,6 +96,10 @@ def cut_image(origin):
         height,width,d = origin.shape
         if h > height//2 or w > width//2 or h <=50 or w <= 50:
           continue
+
+        ct = ct + 1
+        ls.append(len(c))
+
         imgOut = cv2.resize(imgOut, (500, 500))
         cuts.append(np.copy(imgOut))
         for i in box:
@@ -104,6 +107,9 @@ def cut_image(origin):
         # draw a bounding box arounded the detected barcode and display the image
         res = cv2.drawContours(res, [box], -1, (0, 255, 0), 10)
     # plt.imshow(res)
-    print(ct)
-    print(ls)
+    
+    if not ct == 10:
+      print(ct) 
+      print(ls)
+    
     return (cuts,res)
