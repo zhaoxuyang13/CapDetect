@@ -45,29 +45,25 @@ def cut_image(origin):
     # plt.imshow(s)
     # gray = cv2.cvtColor(origin, cv2.COLOR_BGR2GRAY)
     # plt.imshow(gray)
-    gray = s
-
-
+    # 1. thresholding, remove points with low s value.  often margin
+    (_, gray) = cv2.threshold(s, 35, 255, cv2.THRESH_TOZERO)
+    
+    # 2. use solbel to compute gradient of X/Y direction 
     gradX = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
     gradY = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=0, dy=1, ksize=-1)
-    
-    # subtract the y-gradient from the x-gradient
-    gradient = cv2.subtract(gradX, gradY)
+    gradient = cv2.add(gradX, gradY)
     gradient = cv2.convertScaleAbs(gradient)
-    # plt.imshow(gradient)
 
+    # blurred = cv2.medianBlur(gradient, 9)
 
-    blurred = cv2.medianBlur(gradient, 9)
-    # plt.imshow(blurred)
-
-    (_, thresh) = cv2.threshold(blurred, 35, 255, cv2.THRESH_BINARY)
+    (_, thresh) = cv2.threshold(gradient, 35, 255, cv2.THRESH_BINARY)
     # plt.imshow(thresh)
     
     # plt.imshow(cl)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
     cl = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 30))
@@ -100,7 +96,7 @@ def cut_image(origin):
         ct = ct + 1
         ls.append(len(c))
 
-        imgOut = cv2.resize(imgOut, (500, 500))
+        imgOut = cv2.resize(imgOut, (100, 100))
         cuts.append(np.copy(imgOut))
         for i in box:
             res = cv2.circle(res,(i[0],i[1]),15,(0, 0, 255),8)
