@@ -8,6 +8,10 @@ from math import *
 
 
 
+## reference 
+# 物体识别 https://blog.csdn.net/liqiancao/article/details/55670749
+# 旋转矩形框裁剪 https://blog.csdn.net/yjl9122/article/details/71217872
+
 def rotateImage(img, degree, pt1, pt2, pt3, pt4): 
   print(pt1,pt2,pt3,pt4)
   height, width = img.shape[:2]
@@ -81,6 +85,7 @@ def cut_image(origin):
     ls = []
     res = np.copy(origin)
     cuts = []
+    boxlist = []
     for c in cnts:
         if len(c) <= 300:
             continue
@@ -98,6 +103,7 @@ def cut_image(origin):
 
         imgOut = cv2.resize(imgOut, (100, 100))
         cuts.append(np.copy(imgOut))
+        boxlist.append(box)
         for i in box:
             res = cv2.circle(res,(i[0],i[1]),15,(0, 0, 255),8)
         # draw a bounding box arounded the detected barcode and display the image
@@ -108,4 +114,4 @@ def cut_image(origin):
       print(ct) 
       print(ls)
     
-    return (cuts,res)
+    return (cuts,boxlist,res)

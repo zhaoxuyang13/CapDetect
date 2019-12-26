@@ -36,26 +36,26 @@ for file in os.listdir(path):
         continue
     originImg = cv2.imread(path + file) 
     # plt.imshow(originImg)
-    cuts,res = cut_image(originImg)
+    cuts,boxlist,res = cut_image(originImg)
     lastname = ""
     for imgOut in cuts:
         now = datetime.datetime.now()
         filename = str(now.strftime("%d-%H-%M-%S"))
         num_of_pages = str(count)
         filename = resPath+filename + '_'+ num_of_pages +'.jpg'
-        # cv2.imwrite(filename, imgOut)
-        # count = count+1
-        # cv2.imshow("imgOut", imgOut)  # 裁减得到的旋转矩形框
-        # keycode=cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        # label = keycode - ord('0') - 1
-        # if label > 4 :
-        #     with open('./wrongs.txt', 'a+') as wrongs:
-        #         wrongs.write(lastname + "\n")
-        #     label = label - 4
-        # lastname = filename
-        # dataframe = pd.DataFrame({'filename':[filename],'label':[label]})
-        # dataframe.to_csv('label.csv', mode='a', index=False, header=False)   
+        cv2.imwrite(filename, imgOut)
+        count = count+1
+        cv2.imshow("imgOut", imgOut)  # 裁减得到的旋转矩形框
+        keycode=cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        label = keycode - ord('0') - 1
+        if label > 4 :
+            with open('./wrongs.txt', 'a+') as wrongs:
+                wrongs.write(lastname + "\n")
+            label = label - 4
+        lastname = filename
+        dataframe = pd.DataFrame({'filename':[filename],'label':[label]})
+        dataframe.to_csv('label.csv', mode='a', index=False, header=False)   
     if not len(cuts) == 10:
         shutil.move(path+file,wrongPath+file)
     else :
