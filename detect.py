@@ -5,7 +5,7 @@ from color import detect_color
 
 # main fuctionality for detecting caps
 # input the image 
-# return the location(as 4 points), 
+# return the boxlist(array of  4-points), colorList(array of RGB(array)), imagelist(array of cut images)
 
 
 def detect(image):
