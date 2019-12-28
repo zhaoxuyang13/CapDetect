@@ -38,7 +38,6 @@ def plot_colors(hist, centroids):
 	return bar
 '''
 def detect_color(images):
-
     colorlist = []
     for img in images:
         image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

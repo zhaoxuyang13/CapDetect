@@ -1,6 +1,6 @@
 from cut import cut_image
 from color import detect_color
-
+from Classifier.CapDetect import CapDectect
 
 
 # main fuctionality for detecting caps
@@ -9,9 +9,15 @@ from color import detect_color
 
 
 def detect(image):
+    classifier = CapDectect()
     imagelist,boxlist,markedImage = cut_image(image)
     colorList = detect_color(imagelist)
-    return boxlist,colorList,imagelist
+    
+    classlist = []
+    for image in imagelist:
+        classlist.append(classifier.predict(image))
+
+    return boxlist,colorList,imagelist,classlist
 
 
 def test():
@@ -25,11 +31,13 @@ def test():
         if not file.lower().endswith(".jpg"):
             continue
         originImg = cv2.imread(path + file) 
-        boxlist,colorlist,imagelist = detect(originImg)
+        boxlist,colorlist,imagelist,classlist = detect(originImg)
         print("boxlist",boxlist)
         print("colorlist",colorlist)
-        
+        print("classlist",classlist)
         input()
 
-test()
+if __name__ == "__main__":
+    test()
+
         

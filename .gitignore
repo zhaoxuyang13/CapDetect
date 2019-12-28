@@ -1,4 +1,7 @@
 resource/*
 *.jpg
 .DS_Store
-
+__pycache__/*
+*/__pycache__/*
+number.txt
+wrongs.txt
