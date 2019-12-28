@@ -1,5 +1,5 @@
-from cut import cut_image
-from color import detect_color
+from Cutter.cut import cut_image
+from Cutter.color import detect_color
 from Classifier.CapDetect import CapDectect
 
 
@@ -24,7 +24,7 @@ def test():
     import os  
     import cv2
     import datetime
-    path = './dones/'
+    path = './resource/dones/'
 
     for file in os.listdir(path):
         print(file)

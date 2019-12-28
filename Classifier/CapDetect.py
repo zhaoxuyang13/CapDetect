@@ -21,7 +21,6 @@ class CapDectect():
             outputs = self.model(Xtest)
             _, predicted = torch.max(outputs.data, 1)
             predicted = np.array(predicted)
-            
         return predicted[0]
     
 def main():
