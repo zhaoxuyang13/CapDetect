@@ -37,17 +37,40 @@ def plot_colors(hist, centroids):
 	# return the bar chart
 	return bar
 '''
+import webcolors
+
+def closest_colour_name(requested_colour):
+    min_colours = {}
+    for key, name in webcolors.css3_hex_to_names.items():
+        r_c, g_c, b_c = webcolors.hex_to_rgb(key)
+        rd = (r_c - requested_colour[0]) ** 2
+        gd = (g_c - requested_colour[1]) ** 2
+        bd = (b_c - requested_colour[2]) ** 2
+        min_colours[(rd + gd + bd)] = name
+    return min_colours[min(min_colours.keys())]
+
+def get_colour_name(requested_colour):
+    try:
+        closest_name = actual_name = webcolors.rgb_to_name(requested_colour)
+    except ValueError:
+        closest_name = closest_colour_name(requested_colour)
+        actual_name = None
+    return actual_name, closest_name
+
+
 def detect_color(images):
-    colorlist = []
-    for img in images:
-        image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = image.reshape((image.shape[0] * image.shape[1], 3))
-        clt = KMeans(n_clusters = 2)
-        clt.fit(image)
-        hist = centroid_histogram(clt)
-        if hist[0] > hist[1] :
-            prominant_color = clt.cluster_centers_[0]
-        else :
-            prominant_color = clt.cluster_centers_[1]
-        colorlist.append(prominant_color.astype("uint8"))
-    return colorlist
+	colorlist = []
+	for img in images:
+		image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+		image = image.reshape((image.shape[0] * image.shape[1], 3))
+		clt = KMeans(n_clusters = 2)
+		clt.fit(image)
+		hist = centroid_histogram(clt)
+		if hist[0] > hist[1] :
+			prominant_color = clt.cluster_centers_[0]
+		else :
+			prominant_color = clt.cluster_centers_[1]
+		closestColor = closest_colour_name(prominant_color)
+		colorlist.append(webcolors.name_to_rgb(closestColor))
+        # colorlist.append(prominant_color.astype("uint8"))
+	return colorlist

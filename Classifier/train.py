@@ -3,8 +3,8 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
-from dataHelper import DealTrainset,DealDevset,preprocess
-from model import CapCNN
+from Classifier.dataHelper import DealTrainset,DealDevset,preprocess
+from .Classifier.model import CapCNN
 from sklearn import metrics
 
 # 定义是否使用GPU

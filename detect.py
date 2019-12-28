@@ -12,7 +12,7 @@ def detect(image):
     classifier = CapDectect()
     imagelist,boxlist,markedImage = cut_image(image)
     colorList = detect_color(imagelist)
-    
+    print(colorList)
     classlist = []
     for image in imagelist:
         classlist.append(classifier.predict(image))

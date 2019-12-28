@@ -6,11 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import *
 
-
-
 ## reference 
 # 物体识别 https://blog.csdn.net/liqiancao/article/details/55670749
 # 旋转矩形框裁剪 https://blog.csdn.net/yjl9122/article/details/71217872
+
 
 def rotateImage(img, degree, pt1, pt2, pt3, pt4): 
   print(pt1,pt2,pt3,pt4)
