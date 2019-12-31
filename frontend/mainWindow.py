@@ -11,6 +11,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 from functools import partial
 import numpy
+from PIL import Image
+import detect as Detect
 
 
 class Ui_Dialog(object):
@@ -91,13 +93,17 @@ class Ui_Dialog(object):
         print(filename[0])
         if filename[0] != '':
             image = cv2.imread(filename[0])
+            # image = cv2.resize(image, (1000, 1000))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            box_list = numpy.array([[[30, 30], [60, 30], [60, 60], [30, 60]],
+            box_list, color_list, image_list, class_list = Detect.detect(image)
+            """box_list = numpy.array([[[30, 30], [60, 30], [60, 60], [30, 60]],
                                     [[100, 100], [150, 100], [150, 150], [100, 150]],
                                     [[80, 80], [90, 80], [90, 90], [80, 90]]])
             color_list = numpy.array([[250, 25, 25], [120, 20, 120], [250, 25, 25]])
             type_list = numpy.array([0, 1, 2])
-            self.display(image, box_list, color_list, type_list)
+            """
+            self.display(image, box_list, color_list, class_list)
+
             """
             image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
             image_result = Image.fromarray(image)
@@ -108,6 +114,10 @@ class Ui_Dialog(object):
         self.img = img
         w = self.img.shape[1]
         h = self.img.shape[0]
+
+        # cv2.imshow('imshow', img)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         color_map = []
         for i, color in enumerate(color_list):
@@ -129,12 +139,30 @@ class Ui_Dialog(object):
             self.color_buttons[i].clicked.connect(partial(self.change_color, i))
             for j in range(0, 4):
                 img_copy = self.img.copy()
-                for xi in range(0, w):
-                    for xj in range(0, h):
-                        if not self.inside(i, xi, xj, j):
-                            img_copy[xj, xi, 0] = int(self.img[xj, xi, 0] * 0.2)
-                            img_copy[xj, xi, 1] = int(self.img[xj, xi, 1] * 0.2)
-                            img_copy[xj, xi, 2] = int(self.img[xj, xi, 2] * 0.2)
+
+                img_copy = img_copy * 0.2;
+                img_copy = img_copy.astype(numpy.uint8)
+
+                for index, box in enumerate(self.color_boxes[i]):
+                    if self.color_types[i][index] != j:
+                        continue
+                    x1, x2, y1, y2=self.find_corner(box)
+                    print(box)
+                    print(x1,x2,y1,y2)
+                    img_copy[y1:y2, x1:x2] = self.img[y1:y2, x1:x2]
+
+                image_result = Image.fromarray(img_copy)
+                image_result.show()
+                # image_result = cv2.resize(img_copy, (1000, 1000))
+                # img_copy = cv2.cvtColor(img_copy, cv2.COLOR_RGB2GRAY)
+                # image_result = Image.fromarray(img_copy)
+                # image_result.show()
+                # for xi in range(0, w):
+                #     for xj in range(0, h):
+                #         if not self.inside(i, xi, xj, j):
+                #             img_copy[xj, xi, 0] = int(self.img[xj, xi, 0] * 0.2)
+                #             img_copy[xj, xi, 1] = int(self.img[xj, xi, 1] * 0.2)
+                #             img_copy[xj, xi, 2] = int(self.img[xj, xi, 2] * 0.2)
                 self.images[j].append(img_copy)
 
         self.draw_image(self.color)
@@ -143,7 +171,7 @@ class Ui_Dialog(object):
         w = self.img.shape[1]
         h = self.img.shape[0]
 
-        self.picture.resize(QtCore.QSize(w, h))
+        self.picture.resize(QtCore.QSize(500, 500))
         self.frame = QtGui.QImage(self.images[self.type][i], w, h, QtGui.QImage.Format_RGB888)
         self.picture.setPixmap(QtGui.QPixmap.fromImage(self.frame))
         self.picture.setGeometry(QtCore.QRect(50, 50, 500, 500))
@@ -183,6 +211,24 @@ class Ui_Dialog(object):
             if (test_color == color).any():
                 return i
         return -1
+
+    @staticmethod
+    def find_corner(box):
+        x1 = box[0][0]
+        x2 = box[0][0]
+        y1 = box[0][1]
+        y2 = box[0][1]
+        for i in range(1, 4):
+            if box[i][0] < x1:
+                x1 = box[i][0]
+            if box[i][0] > x2:
+                x2 = box[i][0]
+            if box[i][1] < y1:
+                y1 = box[i][1]
+            if box[i][1] > y2:
+                y2 = box[i][1]
+        return x1, x2, y1, y2
+
 
     def inside(self, i, x, y, j):
         for index, box in enumerate(self.color_boxes[i]):
