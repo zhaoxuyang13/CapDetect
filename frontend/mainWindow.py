@@ -21,6 +21,7 @@ class Ui_Dialog(object):
         self.color_buttons = []
         self.color_boxes = []
         self.color_types = []
+        self.color_map = []
         self.images = [[], [], [], []]
         self.type = 0
         self.color = 0
@@ -67,6 +68,7 @@ class Ui_Dialog(object):
         self.button_none.setGeometry(QtCore.QRect(750, 10, 100, 30))
         self.button_none.setText("不是瓶盖")
         self.button_none.clicked.connect(lambda: self.change_type(3))
+        self.button_front.setEnabled(False)
 
         self.label_none = QtWidgets.QLabel(self.result_window)
         self.label_none.setGeometry(QtCore.QRect(650, 30, 160, 40))
@@ -94,8 +96,9 @@ class Ui_Dialog(object):
         if filename[0] != '':
             image = cv2.imread(filename[0])
             # image = cv2.resize(image, (1000, 1000))
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
             box_list, color_list, image_list, class_list = Detect.detect(image)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             """box_list = numpy.array([[[30, 30], [60, 30], [60, 60], [30, 60]],
                                     [[100, 100], [150, 100], [150, 150], [100, 150]],
                                     [[80, 80], [90, 80], [90, 90], [80, 90]]])
@@ -119,50 +122,52 @@ class Ui_Dialog(object):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        color_map = []
         for i, color in enumerate(color_list):
-            result = self.exist_color(color, color_map)
+            result = self.exist_color(color, self.color_map)
             if result >= 0:
                 self.color_boxes[result].append(box_list[i])
                 self.color_types[result].append(type_list[i])
             else:
                 self.color_boxes.append([box_list[i]])
                 self.color_types.append([type_list[i]])
-                color_map.append(color)
+                self.color_map.append(color)
 
-        for i, color in enumerate(color_map):
+        for i, color in enumerate(self.color_map):
             self.color_buttons.append(QtWidgets.QPushButton(self.result_window))
-            self.color_buttons[i].setGeometry(QtCore.QRect(50 + 50 * i, 30, 20, 20))
-            self.color_buttons[i].setStyleSheet("background-color : rgb(" + str(color[0]) + ", " + str(color[1]) + ", "
+            self.color_buttons[i].setGeometry(QtCore.QRect(50 + 50 * i, 10, 20, 20))
+            if i == 0:
+                self.color_buttons[i].setStyleSheet(
+                    "background-color:rgb(" + str(self.color_map[i][0]) + ", " + str(self.color_map[i][1]) + ", "
+                    + str(self.color_map[i][2]) + ");\nborder-radius: 10px;\n\
+                                                                        border-color: #800000;\n\
+                                                                        border-width: 1px;\n\
+                                                                        border-style: solid;")
+            else:
+                self.color_buttons[i].setStyleSheet("background-color:rgb(" + str(color[0]) + ", " + str(color[1]) + ", "
                                                 + str(color[2]) + ");\nborder-radius: 10px;")
             self.color_buttons[i].setIconSize(QtCore.QSize(15, 15))
             self.color_buttons[i].clicked.connect(partial(self.change_color, i))
             for j in range(0, 4):
                 img_copy = self.img.copy()
 
-                img_copy = img_copy * 0.2;
+                img_copy = img_copy * 0.2
                 img_copy = img_copy.astype(numpy.uint8)
 
                 for index, box in enumerate(self.color_boxes[i]):
                     if self.color_types[i][index] != j:
                         continue
                     x1, x2, y1, y2=self.find_corner(box)
-                    print(box)
-                    print(x1,x2,y1,y2)
                     img_copy[y1:y2, x1:x2] = self.img[y1:y2, x1:x2]
 
-                image_result = Image.fromarray(img_copy)
-                image_result.show()
-                # image_result = cv2.resize(img_copy, (1000, 1000))
-                # img_copy = cv2.cvtColor(img_copy, cv2.COLOR_RGB2GRAY)
-                # image_result = Image.fromarray(img_copy)
-                # image_result.show()
                 # for xi in range(0, w):
                 #     for xj in range(0, h):
                 #         if not self.inside(i, xi, xj, j):
                 #             img_copy[xj, xi, 0] = int(self.img[xj, xi, 0] * 0.2)
                 #             img_copy[xj, xi, 1] = int(self.img[xj, xi, 1] * 0.2)
                 #             img_copy[xj, xi, 2] = int(self.img[xj, xi, 2] * 0.2)
+                img_copy = cv2.resize(img_copy, (500, 500))
+                # image_result = Image.fromarray(img_copy)
+                # image_result.show()
                 self.images[j].append(img_copy)
 
         self.draw_image(self.color)
@@ -172,12 +177,14 @@ class Ui_Dialog(object):
         h = self.img.shape[0]
 
         self.picture.resize(QtCore.QSize(500, 500))
-        self.frame = QtGui.QImage(self.images[self.type][i], w, h, QtGui.QImage.Format_RGB888)
+        self.frame = QtGui.QImage(self.images[self.type][i], 500, 500, QtGui.QImage.Format_RGB888)
         self.picture.setPixmap(QtGui.QPixmap.fromImage(self.frame))
         self.picture.setGeometry(QtCore.QRect(50, 50, 500, 500))
+
         self.draw_coordinate(i)
         self.result_window.show()
         QtWidgets.QApplication.processEvents()
+
 
     def draw_coordinate(self, index):
         self.label_none.hide()
@@ -197,18 +204,39 @@ class Ui_Dialog(object):
         if j == 0:
             self.label_none.show()
 
-    def change_color(self, i):
-        self.color = i
-        self.draw_image(i)
+    def change_color(self, index):
+        for i, button in enumerate(self.color_buttons):
+            button.setStyleSheet("background-color:rgb(" + str(self.color_map[i][0]) + ", " + str(self.color_map[i][1]) + ", "
+                                            + str(self.color_map[i][2]) + ");\nborder-radius: 10px;")
+
+        self.color_buttons[index].setStyleSheet("background-color:rgb(" + str(self.color_map[index][0]) + ", " + str(self.color_map[index][1]) + ", "
+                                            + str(self.color_map[index][2]) + ");\nborder-radius: 10px;\n\
+                                                        border-color: #800000;\n\
+                                                        border-width: 1px;\n\
+                                                        border-style: solid;")
+        self.color = index
+        self.draw_image(index)
 
     def change_type(self, i):
+        self.button_front.setEnabled(True)
+        self.button_back.setEnabled(True)
+        self.button_side.setEnabled(True)
+        self.button_none.setEnabled(True)
+        if i == 0:
+            self.button_front.setEnabled(False)
+        if i == 1:
+            self.button_back.setEnabled(False)
+        if i == 2:
+            self.button_side.setEnabled(False)
+        if i == 3:
+            self.button_none.setEnabled(False)
         self.type = i
         self.draw_image(self.color)
 
     @staticmethod
     def exist_color(test_color, color_map):
         for i, color in enumerate(color_map):
-            if (test_color == color).any():
+            if test_color == color:
                 return i
         return -1
 
@@ -228,7 +256,6 @@ class Ui_Dialog(object):
             if box[i][1] > y2:
                 y2 = box[i][1]
         return x1, x2, y1, y2
-
 
     def inside(self, i, x, y, j):
         for index, box in enumerate(self.color_boxes[i]):
