@@ -47,34 +47,6 @@ class Ui_Dialog(object):
         self.label.setStyleSheet("font: 36pt \"Hannotate SC\";")
         self.label.setObjectName("label")
 
-        self.result_window = QtWidgets.QWidget()
-        self.result_window.setGeometry(100, 100, 850, 600)
-        self.result_window.setWindowTitle("Result")
-        self.picture = QtWidgets.QLabel(self.result_window)
-
-        self.button_front = QtWidgets.QPushButton(self.result_window)
-        self.button_front.setGeometry(QtCore.QRect(600, 10, 50, 30))
-        self.button_front.setText("正面")
-        self.button_front.clicked.connect(lambda: self.change_type(0))
-        self.button_back = QtWidgets.QPushButton(self.result_window)
-        self.button_back.setGeometry(QtCore.QRect(650, 10, 50, 30))
-        self.button_back.setText("背面")
-        self.button_back.clicked.connect(lambda: self.change_type(1))
-        self.button_side = QtWidgets.QPushButton(self.result_window)
-        self.button_side.setGeometry(QtCore.QRect(700, 10, 50, 30))
-        self.button_side.setText("侧面")
-        self.button_side.clicked.connect(lambda: self.change_type(2))
-        self.button_none = QtWidgets.QPushButton(self.result_window)
-        self.button_none.setGeometry(QtCore.QRect(750, 10, 100, 30))
-        self.button_none.setText("不是瓶盖")
-        self.button_none.clicked.connect(lambda: self.change_type(3))
-        self.button_front.setEnabled(False)
-
-        self.label_none = QtWidgets.QLabel(self.result_window)
-        self.label_none.setGeometry(QtCore.QRect(650, 30, 160, 40))
-        self.label_none.setStyleSheet("font: 15pt \"Hannotate SC\";")
-        self.label_none.setText("没有此种类型的瓶盖")
-
         self.retranslateUi(Dialog)
         self.pushButton_3.clicked.connect(self.pick_image)
         self.pushButton_2.pressed.connect(lambda: self.button_press(0))
@@ -113,14 +85,49 @@ class Ui_Dialog(object):
             image_result.show()
             """
 
+    def display_init(self):
+        self.result_window = QtWidgets.QWidget()
+        self.result_window.setGeometry(100, 100, 850, 600)
+        self.result_window.setWindowTitle("Result")
+        self.picture = QtWidgets.QLabel(self.result_window)
+
+        self.button_front = QtWidgets.QPushButton(self.result_window)
+        self.button_front.setGeometry(QtCore.QRect(600, 10, 50, 30))
+        self.button_front.setText("正面")
+        self.button_front.clicked.connect(lambda: self.change_type(0))
+        self.button_back = QtWidgets.QPushButton(self.result_window)
+        self.button_back.setGeometry(QtCore.QRect(650, 10, 50, 30))
+        self.button_back.setText("背面")
+        self.button_back.clicked.connect(lambda: self.change_type(1))
+        self.button_side = QtWidgets.QPushButton(self.result_window)
+        self.button_side.setGeometry(QtCore.QRect(700, 10, 50, 30))
+        self.button_side.setText("侧面")
+        self.button_side.clicked.connect(lambda: self.change_type(2))
+        self.button_none = QtWidgets.QPushButton(self.result_window)
+        self.button_none.setGeometry(QtCore.QRect(750, 10, 100, 30))
+        self.button_none.setText("不是瓶盖")
+        self.button_none.clicked.connect(lambda: self.change_type(3))
+        self.button_front.setEnabled(False)
+
+        self.label_none = QtWidgets.QLabel(self.result_window)
+        self.label_none.setGeometry(QtCore.QRect(650, 30, 160, 40))
+        self.label_none.setStyleSheet("font: 15pt \"Hannotate SC\";")
+        self.label_none.setText("没有此种类型的瓶盖")
+
+        self.coordinates = []
+        self.color_buttons = []
+        self.color_boxes = []
+        self.color_types = []
+        self.color_map = []
+        self.images = [[], [], [], []]
+        self.type = 0
+        self.color = 0
+
     def display(self, img, box_list, color_list, type_list):
+        self.display_init()
         self.img = img
         w = self.img.shape[1]
         h = self.img.shape[0]
-
-        # cv2.imshow('imshow', img)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
 
         for i, color in enumerate(color_list):
             result = self.exist_color(color, self.color_map)
@@ -132,6 +139,7 @@ class Ui_Dialog(object):
                 self.color_types.append([type_list[i]])
                 self.color_map.append(color)
 
+        self.color_buttons = []
         for i, color in enumerate(self.color_map):
             self.color_buttons.append(QtWidgets.QPushButton(self.result_window))
             self.color_buttons[i].setGeometry(QtCore.QRect(50 + 50 * i, 10, 20, 20))
@@ -184,7 +192,6 @@ class Ui_Dialog(object):
         self.draw_coordinate(i)
         self.result_window.show()
         QtWidgets.QApplication.processEvents()
-
 
     def draw_coordinate(self, index):
         self.label_none.hide()
