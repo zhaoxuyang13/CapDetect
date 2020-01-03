@@ -11,7 +11,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 from functools import partial
 import numpy
-from PIL import Image
 import detect as Detect
 
 
@@ -111,8 +110,7 @@ class Ui_Dialog(object):
 
         self.label_none = QtWidgets.QLabel(self.result_window)
         self.label_none.setGeometry(QtCore.QRect(650, 30, 160, 40))
-        self.label_none.setStyleSheet("font: 15pt \"Hannotate SC\";")
-        self.label_none.setText("没有此种类型的瓶盖")
+        self.label_none.setText("没有此种类型")
 
         self.coordinates = []
         self.color_buttons = []
@@ -138,6 +136,8 @@ class Ui_Dialog(object):
                 self.color_boxes.append([box_list[i]])
                 self.color_types.append([type_list[i]])
                 self.color_map.append(color)
+        self.color_boxes.append(box_list)
+        self.color_types.append(type_list)
 
         self.color_buttons = []
         for i, color in enumerate(self.color_map):
@@ -177,6 +177,23 @@ class Ui_Dialog(object):
                 # image_result = Image.fromarray(img_copy)
                 # image_result.show()
                 self.images[j].append(img_copy)
+        self.color_buttons.append(QtWidgets.QPushButton(self.result_window))
+        self.color_buttons[len(self.color_buttons)-1].setText("所有颜色")
+        self.color_buttons[len(self.color_buttons)-1].setGeometry(QtCore.QRect(50 + 50 * (len(self.color_buttons)-1), 10, 100, 30))
+        self.color_buttons[len(self.color_buttons)-1].clicked.connect(partial(self.change_color, len(self.color_buttons)-1))
+
+        for j in range(0, 4):
+            img_copy = self.img.copy()
+            img_copy = img_copy * 0.2
+            img_copy = img_copy.astype(numpy.uint8)
+
+            for index, box in enumerate(self.color_boxes[len(self.color_buttons)-1]):
+                if self.color_types[len(self.color_buttons)-1][index] != j:
+                    continue
+                x1, x2, y1, y2 = self.find_corner(box)
+                img_copy[y1:y2, x1:x2] = self.img[y1:y2, x1:x2]
+            img_copy = cv2.resize(img_copy, (500, 500))
+            self.images[j].append(img_copy)
 
         self.draw_image(self.color)
 
@@ -213,10 +230,16 @@ class Ui_Dialog(object):
 
     def change_color(self, index):
         for i, button in enumerate(self.color_buttons):
+            if i == len(self.color_buttons)-1:
+                break
             button.setStyleSheet("background-color:rgb(" + str(self.color_map[i][0]) + ", " + str(self.color_map[i][1]) + ", "
                                             + str(self.color_map[i][2]) + ");\nborder-radius: 10px;")
 
-        self.color_buttons[index].setStyleSheet("background-color:rgb(" + str(self.color_map[index][0]) + ", " + str(self.color_map[index][1]) + ", "
+        if index == len(self.color_buttons)-1:
+            self.color_buttons[index].setEnabled(False)
+        else:
+            self.color_buttons[len(self.color_buttons)-1].setEnabled(True)
+            self.color_buttons[index].setStyleSheet("background-color:rgb(" + str(self.color_map[index][0]) + ", " + str(self.color_map[index][1]) + ", "
                                             + str(self.color_map[index][2]) + ");\nborder-radius: 10px;\n\
                                                         border-color: #800000;\n\
                                                         border-width: 1px;\n\
