@@ -37,7 +37,7 @@ def test():
         if not file.lower().endswith(".jpg"):
             continue
         originImg = cv2.imread(path + file) 
-        boxlist,colorlist,imagelist,classlist = detect(originImg)
+        boxlist,colorlist,imagelist,classlist,res = detect(originImg)
         print("boxlist",boxlist)
         print("colorlist",colorlist)
         print("classlist",classlist)

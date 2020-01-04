@@ -26,3 +26,5 @@ create 3 files for information
 API function
 1. detect
    usage: pos,type,color = detect(image)
+
+
