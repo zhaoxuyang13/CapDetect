@@ -38,10 +38,17 @@ def plot_colors(hist, centroids):
 	return bar
 '''
 import webcolors
+# simple_colors = {'#ffd700':'yellow','#d2b48c': 'yellow','#483d8b': 'purple','#ff6347':'red','#6495ed':'blue','#9370db': 'purple','#4169e1': 'blue','#00ffff': 'cyan', '#0000ff': 'blue','#8b0000': 'darkred','#808080': 'gray','#008000': 'green', '#ff0000': 'red','#800080': 'purple','#ffa500': 'orange', '#ffc0cb': 'pink','#ffffe0': 'lightyellow','#ffff00': 'yellow','#3cb371':'green'}.items()
 
+# simple_colors = {'#9370db': 'mediumpurple','#4169e1': 'royalblue','#00ffff': 'cyan', '#0000ff': 'blue','#8b0000': 'darkred','#808080': 'gray','#008000': 'green', '#ff0000': 'red','#800080': 'purple','#ffa500': 'orange', '#ffc0cb': 'pink','#ffffe0': 'lightyellow','#ffff00': 'yellow','#556b2f': 'darkolivegreen','#8fbc8f': 'darkseagreen'}.items()
+# simple_colors = {'#90ee90':'green','#deb887': 'burlywood','#e9967a': 'red','#ffd700':'yellow','#d2b48c': 'tan','#483d8b': 'purple','#ff6347':'tomato','#6495ed':'cornflowerblue','#9370db': 'mediumpurple','#4169e1': 'royalblue','#00ffff': 'cyan', '#0000ff': 'blue','#8b0000': 'darkred','#808080': 'gray','#008000': 'green', '#ff0000': 'red','#800080': 'purple','#ffa500': 'orange', '#ffc0cb': 'pink','#ffffe0': 'lightyellow','#ffff00': 'yellow','#3cb371':'mediumseagreen'}.items()
+# simple_colors = {'#d2691e': 'orange','#db7093':'violet','#90ee90':'green','#deb887': 'burlywood','#e9967a': 'red','#ffd700':'yellow','#d2b48c': 'tan','#483d8b': 'purple','#ff6347':'tomato','#6495ed':'cornflowerblue','#9370db': 'mediumpurple','#4169e1': 'royalblue','#00ffff': 'cyan', '#0000ff': 'blue','#8b0000': 'darkred','#808080': 'gray','#008000': 'green', '#ff0000': 'red','#800080': 'purple','#ffa500': 'orange', '#ffc0cb': 'pink','#ffffe0': 'lightyellow','#ffff00': 'yellow','#3cb371':'mediumseagreen'}.items()
+simple_colors = {'#f0e68c': 'yellow','#a52a2a': 'red','#f4a460': 'orange','#d2691e': 'orange','#db7093':'violet','#90ee90':'green','#deb887': 'burlywood','#e9967a': 'red','#ffd700':'yellow','#d2b48c': 'tan','#483d8b': 'purple','#ff6347':'red','#6495ed':'blue','#9370db': 'purple','#4169e1': 'blue','#00ffff': 'cyan', '#0000ff': 'blue','#8b0000': 'red','#808080': 'gray','#008000': 'green', '#ff0000': 'red','#800080': 'purple','#ffa500': 'orange', '#ffc0cb': 'pink','#ffffe0': 'yellow','#ffff00': 'yellow','#3cb371':'green'}.items()
+
+#'#daa520': 'orange',
 def closest_colour_name(requested_colour):
     min_colours = {}
-    for key, name in webcolors.css3_hex_to_names.items():
+    for key, name in simple_colors:
         r_c, g_c, b_c = webcolors.hex_to_rgb(key)
         rd = (r_c - requested_colour[0]) ** 2
         gd = (g_c - requested_colour[1]) ** 2
@@ -68,9 +75,15 @@ def detect_color(images):
 		hist = centroid_histogram(clt)
 		if hist[0] > hist[1] :
 			prominant_color = clt.cluster_centers_[0]
+			support_color = clt.cluster_centers_[1]
 		else :
 			prominant_color = clt.cluster_centers_[1]
+			support_color = clt.cluster_centers_[0]
 		closestColor = closest_colour_name(prominant_color)
+		if closestColor == "gray" or closestColor == "tan" or closestColor == "burlywood":
+			closestColor = closest_colour_name(support_color)
 		colorlist.append(webcolors.name_to_rgb(closestColor))
+
+		# colorlist.append((webcolors.name_to_rgb(closestColor), closestColor))
         # colorlist.append(prominant_color.astype("uint8"))
 	return colorlist

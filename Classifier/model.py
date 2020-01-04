@@ -24,10 +24,10 @@ class CapCNN(nn.Module):
                 )
         
         self.classifier = nn.Sequential(
-                nn.Dropout(p=0.5),
+#                nn.Dropout(p=0.5),
                 nn.Linear(32*6*6,32),
                 nn.ReLU(inplace=True),
-                nn.Linear(32,3)
+                nn.Linear(32,4)
                 )
         
     def forward(self,x):

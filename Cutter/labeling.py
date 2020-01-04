@@ -26,7 +26,7 @@ resPath = './resource/results/'
 donePath = './resource/dones/'
 wrongPath = './resource/wrongs/'
 
-with open('./number.txt', 'r') as f:
+with open('./Cutter/number.txt', 'r') as f:
     count = f.read()
 count = int(count)
 
@@ -62,5 +62,5 @@ for file in os.listdir(path):
     else :
         shutil.move(path+file,donePath+file)
        
-with open('./number.txt', 'w') as f:
+with open('./Cutter/number.txt', 'w') as f:
     f.write(str(count))

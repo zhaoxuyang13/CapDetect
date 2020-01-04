@@ -86,7 +86,7 @@ def cut_image(origin):
     cuts = []
     boxlist = []
     for c in cnts:
-        if len(c) <= 300:
+        if len(c) <= 200:
             continue
         # compute the rotated bounding box of the largest contour
         rect = cv2.minAreaRect(c)
