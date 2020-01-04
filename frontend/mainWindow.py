@@ -24,6 +24,7 @@ class Ui_Dialog(object):
         self.images = [[], [], [], []]
         self.type = 0
         self.color = 0
+        self.lines = []
 
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -68,7 +69,7 @@ class Ui_Dialog(object):
             image = cv2.imread(filename[0])
             # image = cv2.resize(image, (1000, 1000))
 
-            box_list, color_list, image_list, class_list = Detect.detect(image)
+            box_list, color_list, image_list, class_list, marked_image = Detect.detect(image)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             """box_list = numpy.array([[[30, 30], [60, 30], [60, 60], [30, 60]],
                                     [[100, 100], [150, 100], [150, 150], [100, 150]],
@@ -86,9 +87,12 @@ class Ui_Dialog(object):
 
     def display_init(self):
         self.result_window = QtWidgets.QWidget()
-        self.result_window.setGeometry(100, 100, 850, 600)
+        self.result_window.paintEvent = self.paintEvent1
+        self.result_window.setGeometry(100, 100, 850, 720)
         self.result_window.setWindowTitle("Result")
         self.picture = QtWidgets.QLabel(self.result_window)
+        self.super_paintEvent = self.picture.paintEvent
+        self.picture.paintEvent = self.paintEvent2
 
         self.button_front = QtWidgets.QPushButton(self.result_window)
         self.button_front.setGeometry(QtCore.QRect(600, 10, 50, 30))
@@ -197,6 +201,25 @@ class Ui_Dialog(object):
 
         self.draw_image(self.color)
 
+    def paintEvent1(self, event):
+        qp = QtGui.QPainter()
+        pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+        qp.begin(self.result_window)
+        qp.setPen(pen)
+        for line in self.lines:
+            qp.drawLine(50+line[0], 50+line[1], 600, line[2]+10)
+        qp.end()
+
+    def paintEvent2(self, event):
+        self.super_paintEvent(event)
+        qp = QtGui.QPainter()
+        pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+        qp.begin(self.picture)
+        qp.setPen(pen)
+        for line in self.lines:
+            qp.drawLine(line[0], line[1], 550, line[2]-40)
+        qp.end()
+
     def draw_image(self, i):
         w = self.img.shape[1]
         h = self.img.shape[0]
@@ -208,9 +231,11 @@ class Ui_Dialog(object):
 
         self.draw_coordinate(i)
         self.result_window.show()
+        self.result_window.update()
         QtWidgets.QApplication.processEvents()
 
     def draw_coordinate(self, index):
+        self.lines = []
         self.label_none.hide()
         for i, coordinate in enumerate(self.coordinates):
             self.coordinates[i].hide()
@@ -219,11 +244,13 @@ class Ui_Dialog(object):
         j = 0
         for i, box in enumerate(self.color_boxes[index]):
             if self.color_types[index][i] == self.type:
+                center_string, center_x, center_y = self.get_center(box, i)
                 self.coordinates.append(QtWidgets.QLabel(self.result_window))
-                self.coordinates[j].setText(self.get_center(box, i))
-                self.coordinates[j].setGeometry(QtCore.QRect(600, 50 + i * 50, 200, 20))
+                self.coordinates[j].setText(center_string)
+                self.coordinates[j].setGeometry(QtCore.QRect(600, 50 + i * 40, 200, 20))
                 self.coordinates[j].setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
                 self.coordinates[j].show()
+                self.lines.append([center_x, center_y, 50 + i * 40])
                 j = j+1
         if j == 0:
             self.label_none.show()
@@ -259,6 +286,7 @@ class Ui_Dialog(object):
         if i == 2:
             self.button_side.setEnabled(False)
         if i == 3:
+            self.change_color(len(self.color_buttons)-1)
             self.button_none.setEnabled(False)
         self.type = i
         self.draw_image(self.color)
@@ -295,12 +323,11 @@ class Ui_Dialog(object):
                 return True
         return False
 
-    @staticmethod
-    def get_center(box, i):
-        center_x = (box[0][0] + box[1][0]) / 2
-        center_y = (box[0][1] + box[3][1]) / 2
+    def get_center(self, box, i):
+        center_x = round((box[0][0] + box[1][0] + box[2][0] + box[3][0]) / 4 / self.img.shape[1] * 500, 3)
+        center_y = round((box[0][1] + box[1][1] + box[2][1] + box[3][1]) / 4 / self.img.shape[0] * 500, 3)
         center_string = str(i + 1) + ':   ' + str(center_x) + '   ' + str(center_y)
-        return center_string
+        return center_string, center_x, center_y,
 
     def button_press(self, index):
         if index == 0:
