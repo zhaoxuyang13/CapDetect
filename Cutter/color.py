@@ -3,20 +3,24 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+
+
 # color detect using mainly K-Clustering
 # reference https://www.pyimagesearch.com/2014/05/26/opencv-python-k-means-color-clustering/
 
 # input clt, return percentages
 def centroid_histogram(clt):
-	# grab the number of different clusters and create a histogram
-	# based on the number of pixels assigned to each cluster
-	numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
-	(hist, _) = np.histogram(clt.labels_, bins = numLabels)
+    # grab the number of different clusters and create a histogram
+    # based on the number of pixels assigned to each cluster
+    numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
+    (hist, _) = np.histogram(clt.labels_, bins=numLabels)
     # normalize the histogram, such that it sums to one
-	hist = hist.astype("float")
-	hist /= hist.sum()
-	# return the histogram
-	return hist
+    hist = hist.astype("float")
+    hist /= hist.sum()
+    # return the histogram
+    return hist
+
+
 '''
 # not used function to plot color percentage
 def plot_colors(hist, centroids):
@@ -37,6 +41,7 @@ def plot_colors(hist, centroids):
 	# return the bar chart
 	return bar
 '''
+
 import webcolors
 # simple_colors = {'#ffd700':'yellow','#d2b48c': 'yellow','#483d8b': 'purple','#ff6347':'red','#6495ed':'blue','#9370db': 'purple','#4169e1': 'blue','#00ffff': 'cyan', '#0000ff': 'blue','#8b0000': 'darkred','#808080': 'gray','#008000': 'green', '#ff0000': 'red','#800080': 'purple','#ffa500': 'orange', '#ffc0cb': 'pink','#ffffe0': 'lightyellow','#ffff00': 'yellow','#3cb371':'green'}.items()
 
@@ -87,3 +92,4 @@ def detect_color(images):
 		# colorlist.append((webcolors.name_to_rgb(closestColor), closestColor))
         # colorlist.append(prominant_color.astype("uint8"))
 	return colorlist
+
