@@ -87,9 +87,9 @@ def detect_color(images):
 		closestColor = closest_colour_name(prominant_color)
 		if closestColor == "gray" or closestColor == "tan" or closestColor == "burlywood":
 			closestColor = closest_colour_name(support_color)
-		colorlist.append(webcolors.name_to_rgb(closestColor))
+		# colorlist.append(webcolors.name_to_rgb(closestColor))
 
-		# colorlist.append((webcolors.name_to_rgb(closestColor), closestColor))
+		colorlist.append((webcolors.name_to_rgb(closestColor), closestColor))
         # colorlist.append(prominant_color.astype("uint8"))
 	return colorlist
 

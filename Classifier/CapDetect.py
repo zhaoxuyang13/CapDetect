@@ -8,7 +8,7 @@ class CapDectect():
     def __init__(self):
         super(CapDectect,self).__init__()
         self.model = CapCNN()
-        self.model.load_state_dict(torch.load('../Classifier/para/cap_para.pkl',map_location='cpu'))
+        self.model.load_state_dict(torch.load('./Classifier/para/cap_para.pkl',map_location='cpu'))
         
     def predict(self,img):
         img_hsv = cv2.cvtColor(img,cv2.COLOR_RGB2HSV)
